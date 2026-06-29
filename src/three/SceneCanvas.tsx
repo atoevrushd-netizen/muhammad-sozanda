@@ -44,10 +44,13 @@ export default function SceneCanvas() {
 
   return (
     <Canvas
-      shadows
+      shadows={!lowPower}
       frameloop={active ? 'always' : 'never'}
-      dpr={[1, lowPower ? 1.3 : 1.85]}
-      gl={{ antialias: false, powerPreference: 'high-performance', alpha: false, stencil: false }}
+      // на мобиле: низкий dpr с агрессивным авто-снижением под нагрузкой
+      dpr={lowPower ? [0.6, 1] : [1, 1.85]}
+      performance={{ min: 0.2 }}
+      // MSAA (дёшево на мобильных tile-GPU) только там, где нет постобработки
+      gl={{ antialias: lowPower, powerPreference: 'high-performance', alpha: false, stencil: false }}
       camera={{ fov: 38, near: 1, far: 3500, position: [230, 135, 300] }}
       onCreated={({ gl, scene }) => {
         gl.toneMapping = THREE.ACESFilmicToneMapping
@@ -67,13 +70,13 @@ export default function SceneCanvas() {
           backgroundBlurriness={0}
         />
 
-        {/* Солнце: направленный свет + длинные мягкие тени */}
+        {/* Солнце: направленный свет (тени только на десктопе) */}
         <directionalLight
-          castShadow
+          castShadow={!lowPower}
           position={LIGHT_POS}
           intensity={2.6}
           color={'#fff1d6'}
-          shadow-mapSize={[lowPower ? 1024 : 4096, lowPower ? 1024 : 4096]}
+          shadow-mapSize={[4096, 4096]}
           shadow-camera-near={1}
           shadow-camera-far={900}
           shadow-camera-left={-240}
@@ -83,7 +86,8 @@ export default function SceneCanvas() {
           shadow-bias={-0.0003}
           shadow-normalBias={0.6}
         />
-        <ambientLight intensity={0.25} color={'#aebfda'} />
+        {/* без теней на мобиле сцена площе — добавляем чуть заполняющего света */}
+        <ambientLight intensity={lowPower ? 0.34 : 0.25} color={'#aebfda'} />
 
         {/* Видимое солнце (источник для GodRays) + мягкий ореол */}
         <mesh ref={setSun} position={SUN_POS}>
@@ -95,10 +99,11 @@ export default function SceneCanvas() {
         <CityModel lowPower={lowPower} />
         <CameraRig />
 
-        {sun && <Effects sun={sun} lowPower={lowPower} />}
+        {/* постобработка — только на десктопе (на мобиле это главный тормоз) */}
+        {!lowPower && sun && <Effects sun={sun} lowPower={false} />}
 
         <AdaptiveDpr pixelated />
-        <BakeShadows />
+        {!lowPower && <BakeShadows />}
       </Suspense>
     </Canvas>
   )

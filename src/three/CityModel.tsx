@@ -2,11 +2,11 @@ import { useEffect, useMemo } from 'react'
 import * as THREE from 'three'
 import { useGLTF } from '@react-three/drei'
 import { asset } from '../lib/asset'
+import { isLowPower } from '../lib/viewStore'
 
-/* Реальная модель города (Blender → GLB), сжатая: WebP-текстуры (≤1024) +
-   meshopt-геометрия (~11 МБ вместо 69 МБ). meshopt и WebP подхватываются
-   автоматически (drei/three). */
-const URL = asset('models/city.glb')
+/* Реальная модель города (Blender → GLB), сжатая: WebP + meshopt.
+   На телефоне грузим более лёгкую версию (текстуры 512 → меньше видеопамяти). */
+const URL = asset(isLowPower() ? 'models/city-mobile.glb' : 'models/city.glb')
 useGLTF.preload(URL)
 
 type Props = { lowPower?: boolean }
@@ -19,8 +19,8 @@ export default function CityModel({ lowPower = false }: Props) {
     scene.traverse((o) => {
       const mesh = o as THREE.Mesh
       if (mesh.isMesh) {
-        mesh.castShadow = true
-        mesh.receiveShadow = true
+        mesh.castShadow = !lowPower
+        mesh.receiveShadow = !lowPower
         const mats = Array.isArray(mesh.material) ? mesh.material : [mesh.material]
         for (const m of mats) {
           const sm = m as THREE.MeshPhysicalMaterial
@@ -53,7 +53,7 @@ export default function CityModel({ lowPower = false }: Props) {
       </group>
 
       {/* большая тёмная «земля» вокруг квартала: бесконечный пол + ловит тени, тонет в тумане */}
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.5, 0]} receiveShadow>
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.5, 0]} receiveShadow={!lowPower}>
         <planeGeometry args={[5000, 5000]} />
         <meshStandardMaterial
           color="#06080c"
