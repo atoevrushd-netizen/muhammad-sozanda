@@ -1,0 +1,279 @@
+@import 'tailwindcss';
+
+/* ============================================================
+   МУҲАММАД СОЗАНДА — дизайн-система
+   Тёмный sci-fi стиль · золото бренда + графит · Montserrat
+   ============================================================ */
+
+@theme {
+  /* Шрифты */
+  --font-sans: 'Montserrat', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+
+  /* Графит / фон */
+  --color-ink-950: #06070a;
+  --color-ink-900: #0a0b0d;
+  --color-ink-850: #0d0f13;
+  --color-ink-800: #111317;
+  --color-ink-700: #181b21;
+  --color-ink-600: #21252d;
+
+  /* Золото бренда (взято из логотипа) */
+  --color-gold-100: #f4ebd6;
+  --color-gold-200: #e7d8b4;
+  --color-gold-300: #d8c298;
+  --color-gold-400: #c9b488;
+  --color-gold-500: #b89a66;
+  --color-gold-600: #97784b;
+  --color-gold-700: #7a6845;
+  --color-gold-800: #574a30;
+
+  /* Текст */
+  --color-fg: #ece9e2;
+  --color-fg-muted: #9aa0a8;
+  --color-fg-dim: #5e636c;
+
+  /* Тех-акцент (холодный, очень дозированно) */
+  --color-tech: #6fa8ff;
+}
+
+/* ------------------------------------------------------------ */
+/* База                                                          */
+/* ------------------------------------------------------------ */
+@layer base {
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    scroll-behavior: auto; /* плавность даёт Lenis */
+  }
+
+  body {
+    margin: 0;
+    background-color: var(--color-ink-900);
+    color: var(--color-fg);
+    font-family: var(--font-sans);
+    font-weight: 400;
+    line-height: 1.6;
+    overflow-x: hidden;
+    /* Видимостью курсора управляет компонент Cursor (только на десктопе с мышью). */
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-weight: 800;
+    line-height: 1.02;
+    letter-spacing: -0.01em;
+    margin: 0;
+  }
+
+  ::selection {
+    background: color-mix(in srgb, var(--color-gold-400) 35%, transparent);
+    color: #fff;
+  }
+
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  button {
+    font-family: inherit;
+  }
+}
+
+/* ------------------------------------------------------------ */
+/* Скроллбар                                                     */
+/* ------------------------------------------------------------ */
+::-webkit-scrollbar {
+  width: 9px;
+}
+::-webkit-scrollbar-track {
+  background: var(--color-ink-950);
+}
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(var(--color-gold-700), var(--color-gold-800));
+  border-radius: 99px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-gold-500);
+}
+
+/* ------------------------------------------------------------ */
+/* Утилиты / компоненты                                          */
+/* ------------------------------------------------------------ */
+@layer components {
+  /* Подпись-«эйброу» в техно-стиле */
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.34em;
+    text-transform: uppercase;
+    color: var(--color-gold-400);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.7em;
+  }
+  .eyebrow::before {
+    content: '';
+    width: 2rem;
+    height: 1px;
+    background: linear-gradient(90deg, var(--color-gold-500), transparent);
+  }
+
+  /* Золотой градиентный текст */
+  .text-gold-gradient {
+    background: linear-gradient(
+      180deg,
+      var(--color-gold-200) 0%,
+      var(--color-gold-400) 45%,
+      var(--color-gold-600) 100%
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  /* Стеклянная панель */
+  .glass {
+    background: color-mix(in srgb, var(--color-ink-800) 55%, transparent);
+    backdrop-filter: blur(14px) saturate(120%);
+    -webkit-backdrop-filter: blur(14px) saturate(120%);
+    border: 1px solid color-mix(in srgb, var(--color-gold-400) 12%, transparent);
+  }
+
+  /* Тонкая золотая граница-волосок */
+  .hairline {
+    border: 1px solid color-mix(in srgb, var(--color-gold-400) 14%, transparent);
+  }
+
+  /* Заголовок секции */
+  .section-title {
+    font-size: clamp(2rem, 5.5vw, 4.6rem);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    line-height: 1;
+  }
+
+  /* Номер секции (моно, только цифры/латиница) */
+  .section-index {
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    letter-spacing: 0.2em;
+    color: var(--color-gold-600);
+  }
+
+  /* Кнопка */
+  .btn-gold {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6em;
+    padding: 0.95rem 1.9rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    color: var(--color-ink-950);
+    background: linear-gradient(135deg, var(--color-gold-200), var(--color-gold-500));
+    border-radius: 2px;
+    overflow: hidden;
+    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s;
+    box-shadow: 0 8px 30px -10px color-mix(in srgb, var(--color-gold-400) 60%, transparent);
+  }
+  .btn-gold:hover {
+    box-shadow: 0 14px 44px -10px color-mix(in srgb, var(--color-gold-400) 75%, transparent);
+  }
+
+  .btn-ghost {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6em;
+    padding: 0.95rem 1.9rem;
+    font-weight: 500;
+    color: var(--color-fg);
+    border: 1px solid color-mix(in srgb, var(--color-gold-400) 22%, transparent);
+    border-radius: 2px;
+    transition: border-color 0.4s, background 0.4s, color 0.4s;
+  }
+  .btn-ghost:hover {
+    border-color: var(--color-gold-400);
+    background: color-mix(in srgb, var(--color-gold-400) 8%, transparent);
+  }
+}
+
+@layer utilities {
+  /* Контейнер контента */
+  .container-x {
+    width: 100%;
+    max-width: 1320px;
+    margin-inline: auto;
+    padding-inline: clamp(1.25rem, 4vw, 4rem);
+  }
+
+  /* Мягкое свечение текста */
+  .glow-gold {
+    text-shadow: 0 0 28px color-mix(in srgb, var(--color-gold-400) 45%, transparent);
+  }
+
+  /* Декоративная сетка sci-fi */
+  .grid-overlay {
+    background-image:
+      linear-gradient(color-mix(in srgb, var(--color-gold-400) 6%, transparent) 1px, transparent 1px),
+      linear-gradient(90deg, color-mix(in srgb, var(--color-gold-400) 6%, transparent) 1px, transparent 1px);
+    background-size: 64px 64px;
+  }
+}
+
+/* ------------------------------------------------------------ */
+/* Зернистость (плёночный грейн поверх всего)                   */
+/* ------------------------------------------------------------ */
+.grain::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  pointer-events: none;
+  opacity: 0.05;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* ------------------------------------------------------------ */
+/* Анимации                                                      */
+/* ------------------------------------------------------------ */
+@keyframes float-slow {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+@keyframes pulse-soft {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 1; }
+}
+@keyframes scroll-hint {
+  0% { transform: translateY(0); opacity: 0; }
+  40% { opacity: 1; }
+  100% { transform: translateY(12px); opacity: 0; }
+}
+@keyframes spin-slow {
+  to { transform: rotate(360deg); }
+}
+
+.anim-float { animation: float-slow 6s ease-in-out infinite; }
+.anim-spin-slow { animation: spin-slow 22s linear infinite; }
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
