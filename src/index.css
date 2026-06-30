@@ -265,19 +265,9 @@
   to { transform: rotate(360deg); }
 }
 
-/* Герой-ролик: камера-наезд отрендерена в Blender и проигрывается видео; после
-   замирания на финальном кадре CSS добавляет лёгкий бесконечный дрейф, чтобы
-   кадр «дышал». Базовый scale(1.04) — запас по краям, чтобы дрейф не оголял борта. */
-@keyframes hero-hold-drift {
-  0%   { transform: scale(1.04) translate3d(0, 0, 0); }
-  50%  { transform: scale(1.09) translate3d(-1%, -0.8%, 0); }
-  100% { transform: scale(1.04) translate3d(0, 0, 0); }
-}
-.hero-video {
-  transform: scale(1.04);
-  will-change: transform;
-  animation: hero-hold-drift 38s ease-in-out 2.5s infinite;
-}
+/* Герой — секвенция WebP, управляемая скроллом и нарисованная в <canvas>
+   (см. Background3D.tsx). Анимация — это сам скруб кадров, отдельных CSS-кейфреймов
+   фону не нужно. */
 
 .anim-float { animation: float-slow 6s ease-in-out infinite; }
 .anim-spin-slow { animation: spin-slow 22s linear infinite; }
