@@ -265,22 +265,18 @@
   to { transform: rotate(360deg); }
 }
 
-/* Герой-картинка: «наезд» камеры на старте, затем медленный кинематографичный дрейф */
-@keyframes hero-intro {
-  from { transform: scale(1.18); }
-  to   { transform: scale(1.06); }
+/* Герой-ролик: камера-наезд отрендерена в Blender и проигрывается видео; после
+   замирания на финальном кадре CSS добавляет лёгкий бесконечный дрейф, чтобы
+   кадр «дышал». Базовый scale(1.04) — запас по краям, чтобы дрейф не оголял борта. */
+@keyframes hero-hold-drift {
+  0%   { transform: scale(1.04) translate3d(0, 0, 0); }
+  50%  { transform: scale(1.09) translate3d(-1%, -0.8%, 0); }
+  100% { transform: scale(1.04) translate3d(0, 0, 0); }
 }
-@keyframes hero-kenburns {
-  0%   { transform: scale(1.06) translate3d(0, 0, 0); }
-  50%  { transform: scale(1.12) translate3d(-1.1%, -1%, 0); }
-  100% { transform: scale(1.06) translate3d(0, 0, 0); }
-}
-.hero-img {
-  transform: scale(1.06);
+.hero-video {
+  transform: scale(1.04);
   will-change: transform;
-  animation:
-    hero-intro 5s cubic-bezier(0.16, 1, 0.3, 1) both,
-    hero-kenburns 34s ease-in-out 5s infinite;
+  animation: hero-hold-drift 38s ease-in-out 2.5s infinite;
 }
 
 .anim-float { animation: float-slow 6s ease-in-out infinite; }
