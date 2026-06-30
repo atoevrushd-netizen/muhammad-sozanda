@@ -1,29 +1,48 @@
 import { useEffect, useState } from 'react'
-import { useProgress } from '@react-three/drei'
 import { motion, AnimatePresence } from 'framer-motion'
 import { brand } from '../lib/content'
+import { asset } from '../lib/asset'
 
+/* Прелоадер: ждём загрузки геройских картинок (без three.js).
+   Минимальная выдержка ~1.1с — чтобы успел проиграться бренд-интро. */
 export default function Loader({ onComplete }: { onComplete: () => void }) {
-  const { progress, active } = useProgress()
   const [done, setDone] = useState(false)
-  const pct = Math.round(progress)
+  const [pct, setPct] = useState(8)
 
   useEffect(() => {
-    // штатное завершение, когда ассеты загрузились
-    if (progress >= 100 && !active) {
-      const t = setTimeout(() => setDone(true), 650)
-      return () => clearTimeout(t)
+    let cancelled = false
+    const start = performance.now()
+    const MIN_MS = 1100
+    const srcs = [asset('hero/hero-desktop.webp'), asset('hero/hero-mobile.webp')]
+    let loaded = 0
+
+    const finish = () => {
+      if (cancelled) return
+      const wait = Math.max(0, MIN_MS - (performance.now() - start))
+      setTimeout(() => !cancelled && setDone(true), wait + 350)
     }
-  }, [progress, active])
+    const onOne = () => {
+      loaded++
+      setPct(Math.max(8, Math.round((loaded / srcs.length) * 100)))
+      if (loaded >= srcs.length) finish()
+    }
 
-  useEffect(() => {
-    // страховка: не «залипать» дольше 14 секунд (модель тяжёлая)
-    const t = setTimeout(() => setDone(true), 14000)
-    return () => clearTimeout(t)
+    srcs.forEach((s) => {
+      const img = new Image()
+      img.onload = onOne
+      img.onerror = onOne
+      img.src = s
+    })
+
+    // страховка от зависания
+    const safety = setTimeout(() => !cancelled && setDone(true), 8000)
+    return () => {
+      cancelled = true
+      clearTimeout(safety)
+    }
   }, [])
 
-  // сообщаем «готово» сразу при завершении — герой начинает проявляться,
-  // пока лоадер плавно уходит (надёжнее, чем ждать onExitComplete)
+  // сообщаем «готово» сразу при завершении — герой проявляется, пока лоадер уходит
   useEffect(() => {
     if (done) onComplete()
   }, [done, onComplete])

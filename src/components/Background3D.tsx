@@ -1,10 +1,22 @@
-import SceneCanvas from '../three/SceneCanvas'
+import { asset } from '../lib/asset'
 
-/* Фиксированный 3D-фон + скримы для читабельности текста поверх сцены. */
+/* Фиксированный фон-герой: заранее отрендеренный кадр (Blender), без WebGL —
+   на телефоне ничего не считается, лагать нечему. Десктоп — горизонтальный кадр,
+   телефон — вертикальный (выбор по ориентации экрана). Сверху — скримы и виньетка
+   для читабельности текста + лёгкий «наезд»/дрейф камеры через CSS. */
 export default function Background3D() {
   return (
-    <div className="fixed inset-0 z-0">
-      <SceneCanvas />
+    <div className="fixed inset-0 z-0 overflow-hidden bg-ink-950">
+      <picture>
+        <source media="(orientation: portrait)" srcSet={asset('hero/hero-mobile.webp')} />
+        <img
+          src={asset('hero/hero-desktop.webp')}
+          alt=""
+          aria-hidden="true"
+          decoding="async"
+          className="hero-img absolute inset-0 h-full w-full object-cover"
+        />
+      </picture>
 
       {/* затемнение книзу — чтобы контент читался */}
       <div
