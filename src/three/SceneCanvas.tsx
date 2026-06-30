@@ -1,20 +1,34 @@
-import { Suspense, useEffect, useMemo, useState } from 'react'
-import { Canvas } from '@react-three/fiber'
+import { Suspense, useEffect, useLayoutEffect, useMemo, useState } from 'react'
+import { Canvas, useThree } from '@react-three/fiber'
 import { Environment, AdaptiveDpr, BakeShadows } from '@react-three/drei'
 import * as THREE from 'three'
 import CityModel from './CityModel'
 import CameraRig from './CameraRig'
-import Effects from './Effects'
-import { makeGlowTexture } from './procedural'
+import { makeSkyGradient } from './procedural'
 import { isLowPower } from '../lib/viewStore'
 import { asset } from '../lib/asset'
 
-// Солнце. Масштаб под модель ~8 ед.
-const SUN_POS: [number, number, number] = [-30, 22, -38]
+// Направление солнечного света (для света/теней). Масштаб под модель ~8 ед.
 const LIGHT_POS: [number, number, number] = [-24, 18, -28]
 
+/* Дешёвое небо для телефона: вместо ежекадрового рисования полноэкранного
+   HDRI-скайбокса ставим лёгкий вертикальный градиент в scene.background.
+   HDRI при этом остаётся для отражений/освещения (IBL), но не рисуется на весь экран. */
+function MobileSky() {
+  const scene = useThree((s) => s.scene)
+  const tex = useMemo(() => makeSkyGradient(), [])
+  useLayoutEffect(() => {
+    const prev = scene.background
+    scene.background = tex
+    return () => {
+      scene.background = prev
+      tex.dispose()
+    }
+  }, [scene, tex])
+  return null
+}
+
 export default function SceneCanvas() {
-  const [sun, setSun] = useState<THREE.Mesh | null>(null)
   const lowPower = useMemo(() => isLowPower(), [])
 
   // Пауза рендера, когда 3D-герой ушёл за контент (экономия GPU/батареи на телефоне)
@@ -26,31 +40,23 @@ export default function SceneCanvas() {
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
 
-  const halo = useMemo(() => {
-    const tex = makeGlowTexture('rgba(255,243,212,0.9)', 'rgba(255,243,212,0)')
-    const mat = new THREE.SpriteMaterial({
-      map: tex,
-      color: 0xfff3d4,
-      transparent: true,
-      blending: THREE.AdditiveBlending,
-      depthWrite: false,
-      depthTest: true,
-      toneMapped: false,
-    })
-    const s = new THREE.Sprite(mat)
-    s.scale.set(34, 34, 1)
-    return s
-  }, [])
-
   return (
     <Canvas
       shadows={!lowPower}
       frameloop={active ? 'always' : 'never'}
-      // на мобиле: низкий dpr с агрессивным авто-снижением под нагрузкой
-      dpr={lowPower ? [0.6, 1] : [1, 1.85]}
+      // мобайл: фиксированный низкий dpr — главный выигрыш по филлрейту; + авто-снижение
+      dpr={lowPower ? 0.7 : [1, 1.85]}
       performance={{ min: 0.2 }}
-      // MSAA (дёшево на мобильных tile-GPU) только там, где нет постобработки
-      gl={{ antialias: lowPower, powerPreference: 'high-performance', alpha: false, stencil: false }}
+      gl={{
+        // MSAA — единственное сглаживание (постобработки/SMAA больше нет); на tile-GPU дёшев
+        antialias: true,
+        powerPreference: lowPower ? 'default' : 'high-performance',
+        // mediump на мобиле снижает стоимость фрагментного шейдера; геометрии ~58 тр.
+        precision: lowPower ? 'mediump' : 'highp',
+        alpha: false,
+        stencil: false,
+        depth: true,
+      }}
       camera={{ fov: 35, near: 0.1, far: 300, position: [0, 4.6, 17] }}
       onCreated={({ gl, scene }) => {
         gl.toneMapping = THREE.ACESFilmicToneMapping
@@ -59,16 +65,18 @@ export default function SceneCanvas() {
       }}
     >
       <Suspense fallback={null}>
-        {/* HDRI: ясное утреннее небо citrus_orchard_road_puresky */}
+        {/* HDRI citrus_orchard_road_puresky:
+            десктоп — фон + отражения; мобайл — только отражения (IBL), фон рисуем градиентом */}
         <Environment
           files={
             lowPower
               ? asset('assets/hdri/citrus_orchard_road_puresky_1k.hdr')
               : asset('assets/hdri/citrus_orchard_road_puresky_2k.hdr')
           }
-          background
+          background={!lowPower}
           backgroundBlurriness={0}
         />
+        {lowPower && <MobileSky />}
 
         {/* Солнце: направленный свет (тени только на десктопе) */}
         <directionalLight
@@ -86,21 +94,11 @@ export default function SceneCanvas() {
           shadow-bias={-0.0004}
           shadow-normalBias={0.03}
         />
-        {/* без теней на мобиле сцена площе — добавляем чуть заполняющего света */}
+        {/* мягкий заполняющий свет */}
         <ambientLight intensity={lowPower ? 0.34 : 0.25} color={'#aebfda'} />
-
-        {/* Видимое солнце (источник для GodRays) + мягкий ореол */}
-        <mesh ref={setSun} position={SUN_POS}>
-          <sphereGeometry args={[2, 20, 20]} />
-          <meshBasicMaterial color={'#fff4d6'} toneMapped={false} />
-        </mesh>
-        <primitive object={halo} position={SUN_POS} />
 
         <CityModel lowPower={lowPower} />
         <CameraRig />
-
-        {/* постобработка — только на десктопе (на мобиле это главный тормоз) */}
-        {!lowPower && sun && <Effects sun={sun} lowPower={false} />}
 
         <AdaptiveDpr pixelated />
         {!lowPower && <BakeShadows />}

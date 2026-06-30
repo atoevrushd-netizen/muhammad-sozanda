@@ -8,13 +8,15 @@ import { view } from '../lib/viewStore'
    КАМЕРЫ держим фронтальным и небольшим: медленный наезд + лёгкий параллакс/дрейф.
    Никакого облёта вокруг — иначе покажутся «дыры» сзади. */
 
-const INTRO_POS = new THREE.Vector3(0.4, 5.4, 21)
-const INTRO_LOOK = new THREE.Vector3(0, 3.2, 0)
-const HERO_POS = new THREE.Vector3(0, 4.6, 16.5)
-const HERO_LOOK = new THREE.Vector3(0, 3.0, 0)
-// скролл: лёгкий наезд, остаёмся фронтально
-const END_POS = new THREE.Vector3(0, 4.0, 12.5)
-const END_LOOK = new THREE.Vector3(0, 2.7, 0)
+// Камера чуть ниже и сдвинута вправо — здания читаются под лёгким углом
+// (не фронтально в лоб). Угол маленький, срезанные грани сзади не показываются.
+const INTRO_POS = new THREE.Vector3(3.0, 4.4, 21)
+const INTRO_LOOK = new THREE.Vector3(0.3, 3.0, 0)
+const HERO_POS = new THREE.Vector3(2.6, 3.5, 16.5)
+const HERO_LOOK = new THREE.Vector3(0.3, 2.7, 0)
+// скролл: лёгкий наезд, угол сохраняем
+const END_POS = new THREE.Vector3(2.0, 3.1, 12.5)
+const END_LOOK = new THREE.Vector3(0.3, 2.5, 0)
 
 const INTRO_DUR = 4.5
 const smoothstep = (x: number) => x * x * (3 - 2 * x)

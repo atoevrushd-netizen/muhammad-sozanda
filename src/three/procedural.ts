@@ -107,20 +107,23 @@ export function makeWindowTexture(seed = 7): THREE.Texture {
   return tex
 }
 
-/** Мягкий радиальный спрайт (для бликов/lens flare). */
-export function makeGlowTexture(inner = 'rgba(255,244,214,1)', outer = 'rgba(255,244,214,0)'): THREE.Texture {
-  const size = 256
+/** Дешёвый вертикальный градиент неба для scene.background на телефоне
+   (вместо ежекадрового рисования полноэкранного HDRI-скайбокса). */
+export function makeSkyGradient(top = '#6f88a6', bottom = '#d8cfbe'): THREE.Texture {
   const cv = document.createElement('canvas')
-  cv.width = cv.height = size
+  cv.width = 2
+  cv.height = 256
   const ctx = cv.getContext('2d')!
-  const g = ctx.createRadialGradient(size / 2, size / 2, 0, size / 2, size / 2, size / 2)
-  g.addColorStop(0, inner)
-  g.addColorStop(0.18, inner)
-  g.addColorStop(1, outer)
+  const g = ctx.createLinearGradient(0, 0, 0, cv.height)
+  g.addColorStop(0, top)
+  g.addColorStop(1, bottom)
   ctx.fillStyle = g
-  ctx.fillRect(0, 0, size, size)
+  ctx.fillRect(0, 0, cv.width, cv.height)
   const tex = new THREE.CanvasTexture(cv)
   tex.colorSpace = THREE.SRGBColorSpace
+  tex.magFilter = THREE.LinearFilter
+  tex.minFilter = THREE.LinearFilter
+  tex.generateMipmaps = false
   return tex
 }
 

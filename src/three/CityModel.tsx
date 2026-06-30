@@ -49,10 +49,15 @@ export default function CityModel({ lowPower = false }: Props) {
         </group>
       </group>
 
-      {/* тёмная земля под кварталом (масштаб модели ~8 ед.) */}
+      {/* тёмная земля под кварталом (масштаб модели ~8 ед.).
+          На мобиле — простой unlit-материал (без PBR/IBL на большой поверхности). */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.01, 0]} receiveShadow={!lowPower}>
         <planeGeometry args={[400, 400]} />
-        <meshStandardMaterial color="#06080c" metalness={0.4} roughness={0.55} envMapIntensity={0.35} />
+        {lowPower ? (
+          <meshBasicMaterial color="#06080c" />
+        ) : (
+          <meshStandardMaterial color="#06080c" metalness={0.4} roughness={0.55} envMapIntensity={0.35} />
+        )}
       </mesh>
     </group>
   )

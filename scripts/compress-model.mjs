@@ -1,6 +1,6 @@
 /* Оптимизация GLB-модели города для веба. Делает ДВЕ версии:
    - public/models/buildings.glb        — десктоп: WebP, нормали lossless, остальное q95 (без потери качества)
-   - public/models/buildings-mobile.glb — телефон: WebP ≤1024, q85 (легче по видеопамяти)
+   - public/models/buildings-mobile.glb — телефон: WebP ≤512, q85 (резко легче по видеопамяти)
    Геометрия — meshopt. На вебе WebP читает three, meshopt — drei (автоматически).
 
    Запуск:  npm run compress
@@ -50,11 +50,11 @@ async function buildMobile(out) {
     dedup(),
     prune(),
     weld(),
-    textureCompress({ encoder: sharp, targetFormat: 'webp', resize: [1024, 1024], quality: 85 }),
+    textureCompress({ encoder: sharp, targetFormat: 'webp', resize: [512, 512], quality: 85 }),
     meshopt({ encoder: MeshoptEncoder, level: 'high' }),
   )
   await newIO().write(out, doc)
-  report(out, '≤1024, q85')
+  report(out, '≤512, q85')
 }
 
 function report(out, note) {
