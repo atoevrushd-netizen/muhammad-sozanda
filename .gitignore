@@ -20,5 +20,8 @@ pnpm-debug.log*
 # временные файлы
 scratch_*
 
-# исходная тяжёлая 3D-модель (~70 МБ) — в репо не нужна, в сборку идёт сжатая public/models/city.glb
+# исходная тяжёлая 3D-модель — в репо не нужна, в сборку идёт сжатая public/models/buildings.glb
 model-source/
+
+# исходники Blender (.blend, текстуры) — рабочие файлы, для сайта не нужны
+Blender Project/

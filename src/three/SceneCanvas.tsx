@@ -9,9 +9,9 @@ import { makeGlowTexture } from './procedural'
 import { isLowPower } from '../lib/viewStore'
 import { asset } from '../lib/asset'
 
-// Солнце далеко и невысоко — длинные утренние тени. Масштаб под модель (~248 ед.).
-const SUN_POS: [number, number, number] = [-300, 180, -340]
-const LIGHT_POS: [number, number, number] = [-240, 150, -270]
+// Солнце. Масштаб под модель ~8 ед.
+const SUN_POS: [number, number, number] = [-30, 22, -38]
+const LIGHT_POS: [number, number, number] = [-24, 18, -28]
 
 export default function SceneCanvas() {
   const [sun, setSun] = useState<THREE.Mesh | null>(null)
@@ -38,7 +38,7 @@ export default function SceneCanvas() {
       toneMapped: false,
     })
     const s = new THREE.Sprite(mat)
-    s.scale.set(340, 340, 1)
+    s.scale.set(34, 34, 1)
     return s
   }, [])
 
@@ -51,11 +51,11 @@ export default function SceneCanvas() {
       performance={{ min: 0.2 }}
       // MSAA (дёшево на мобильных tile-GPU) только там, где нет постобработки
       gl={{ antialias: lowPower, powerPreference: 'high-performance', alpha: false, stencil: false }}
-      camera={{ fov: 38, near: 1, far: 3500, position: [230, 135, 300] }}
+      camera={{ fov: 35, near: 0.1, far: 300, position: [0, 4.6, 17] }}
       onCreated={({ gl, scene }) => {
         gl.toneMapping = THREE.ACESFilmicToneMapping
         gl.toneMappingExposure = 1.0
-        scene.fog = new THREE.FogExp2(new THREE.Color('#b9b0a0'), lowPower ? 0.0008 : 0.001)
+        scene.fog = new THREE.FogExp2(new THREE.Color('#b9b0a0'), lowPower ? 0.009 : 0.011)
       }}
     >
       <Suspense fallback={null}>
@@ -76,22 +76,22 @@ export default function SceneCanvas() {
           position={LIGHT_POS}
           intensity={2.6}
           color={'#fff1d6'}
-          shadow-mapSize={[4096, 4096]}
-          shadow-camera-near={1}
-          shadow-camera-far={900}
-          shadow-camera-left={-240}
-          shadow-camera-right={240}
-          shadow-camera-top={260}
-          shadow-camera-bottom={-160}
-          shadow-bias={-0.0003}
-          shadow-normalBias={0.6}
+          shadow-mapSize={[2048, 2048]}
+          shadow-camera-near={0.5}
+          shadow-camera-far={90}
+          shadow-camera-left={-14}
+          shadow-camera-right={14}
+          shadow-camera-top={16}
+          shadow-camera-bottom={-4}
+          shadow-bias={-0.0004}
+          shadow-normalBias={0.03}
         />
         {/* без теней на мобиле сцена площе — добавляем чуть заполняющего света */}
         <ambientLight intensity={lowPower ? 0.34 : 0.25} color={'#aebfda'} />
 
         {/* Видимое солнце (источник для GodRays) + мягкий ореол */}
         <mesh ref={setSun} position={SUN_POS}>
-          <sphereGeometry args={[16, 24, 24]} />
+          <sphereGeometry args={[2, 20, 20]} />
           <meshBasicMaterial color={'#fff4d6'} toneMapped={false} />
         </mesh>
         <primitive object={halo} position={SUN_POS} />
