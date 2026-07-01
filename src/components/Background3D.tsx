@@ -4,7 +4,7 @@ import { isLowPower } from '../lib/viewStore'
 
 /* Фиксированный фон-герой: отрендеренный в Blender наезд камеры по городу,
    управляемый СКРОЛЛОМ (не автоплей). Сверху страницы виден 1-й кадр; по мере
-   прокрутки первого экрана кадры идут 1→40, вверх — назад. Это секвенция WebP,
+   прокрутки первого экрана кадры идут 1→100, вверх — назад. Это секвенция WebP,
    которую рисуем в <canvas> (Apple-style scrubbing) — на мобиле надёжнее, чем
    перемотка <video> (нет джанка с video.seek на iOS). Никакого WebGL.
 
@@ -19,7 +19,7 @@ import { isLowPower } from '../lib/viewStore'
    Доступность: при prefers-reduced-motion скруб отключаем — показываем один
    статичный кадр. */
 
-const FRAME_COUNT = 40
+const FRAME_COUNT = 100
 const pad4 = (n: number) => String(n).padStart(4, '0')
 
 export default function Background3D() {
